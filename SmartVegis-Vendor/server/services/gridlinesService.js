@@ -40,24 +40,26 @@ export async function verifyFSSAILicense(fssaiNumber) {
         console.log('✅ Gridlines API Response:', JSON.stringify(response.data, null, 2));
 
         if (response.data && response.data.data) {
-            const data = response.data.data;
-            console.log('📦 FSSAI Data:', JSON.stringify(data, null, 2));
+            // Data is nested inside fssai_data
+            const fssaiData = response.data.data.fssai_data || response.data.data;
+            console.log('📦 FSSAI Data:', JSON.stringify(fssaiData, null, 2));
 
             return {
                 success: true,
                 verified: true,
                 data: {
-                    licenseNumber: data.license_number || data.fssai_no || fssaiNumber,
-                    companyName: data.name || data.company_name || data.premise_name || data.firm_name || 'Vendor Store',
-                    address: data.address || data.premise_address || data.full_address || '',
-                    state: data.state || 'Maharashtra',
-                    district: data.district || '',
-                    pincode: data.pincode || '',
-                    licenseType: data.license_type || data.license_category || 'FSSAI',
-                    status: data.status || data.license_status || 'Active',
-                    expiryDate: data.expiry_date || data.valid_upto ? new Date(data.expiry_date || data.valid_upto) : null,
-                    issuedDate: data.issued_date || data.valid_from ? new Date(data.issued_date || data.valid_from) : null,
-                    products: data.products || data.product_list || []
+                    licenseNumber: fssaiData.license_number || fssaiData.fssai_no || fssaiNumber,
+                    companyName: fssaiData.name || fssaiData.company_name || fssaiData.premise_name || 'Vendor Store',
+                    address: fssaiData.address || fssaiData.full_address || '',
+                    state: fssaiData.state || 'Maharashtra',
+                    district: fssaiData.district || '',
+                    pincode: fssaiData.pincode || '',
+                    taluk: fssaiData.taluk || '',
+                    licenseType: fssaiData.type || fssaiData.license_type || 'FSSAI',
+                    status: fssaiData.active ? 'Active' : 'Inactive',
+                    expiryDate: fssaiData.expiry_date ? new Date(fssaiData.expiry_date) : null,
+                    issuedDate: fssaiData.issued_date ? new Date(fssaiData.issued_date) : null,
+                    products: fssaiData.products || []
                 }
             };
         }
